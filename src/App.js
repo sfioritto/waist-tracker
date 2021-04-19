@@ -1,23 +1,48 @@
-import logo from './logo.svg';
+import { useCallback, useState } from 'react';
 import './App.css';
 
-function App() {
+const WaistForm = ({ addEntry, date }) => {
+  const [entry, setEntry] = useState({ date, value: '' })
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <input type="text" onChange={(event) => {
+        setEntry({ date, value: event.target.value })
+      }} 
+      value={entry.value} />
+      <button onClick={() => {
+        addEntry(entry);
+      }}>
+        Add Entry
+      </button>
+    </div>
+  );
+}
+
+function App() {
+  const [entries, setEntries] = useState({});
+
+  const editEntry = useCallback((entry) => {
+    setEntries({
+      ...entries,
+      [entry.date]: entry,
+    });
+  }, [entries, setEntries])
+
+  return (
+    <div>
+      <WaistForm addEntry={editEntry} date={new Date().toISOString} />
+      <div>
+        {Object.values(entries).map(({ value, date }) => {
+          const formattedDate = new Date(date);
+          return (
+            <div key={date}>
+              <p>{formattedDate.toLocaleString('mm/dd/yyyy')}</p>
+              <p>{value}</p>
+            </div>
+          )
+        })}
+      </div>
     </div>
   );
 }
