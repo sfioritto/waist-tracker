@@ -1,17 +1,18 @@
 import { useCallback, useState } from 'react';
 import './App.css';
 
-const WaistForm = ({ addEntry, date }) => {
-  const [entry, setEntry] = useState({ date, value: '' })
+const WaistForm = ({ editEntry, entry }) => {
+  const [value, setValue] = useState(entry.value || '');
+  const [date, setDate] = useState(entry.date);
 
   return (
     <div>
       <input type="text" onChange={(event) => {
-        setEntry({ date, value: event.target.value })
-      }} 
-      value={entry.value} />
+        setValue(event.target.value);
+      }}
+        value={value} />
       <button onClick={() => {
-        addEntry(entry);
+        editEntry({ value, date });
       }}>
         Add Entry
       </button>
@@ -21,6 +22,9 @@ const WaistForm = ({ addEntry, date }) => {
 
 function App() {
   const [entries, setEntries] = useState({});
+  const today = new Date();
+  const todayUTC = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
+  const todayISO = todayUTC.toISOString();
 
   const editEntry = useCallback((entry) => {
     setEntries({
@@ -28,16 +32,20 @@ function App() {
       [entry.date]: entry,
     });
   }, [entries, setEntries])
-
+  console.log(entries)
+  console.log(todayISO)
+  console.log(entries[todayISO])
   return (
     <div>
-      <WaistForm addEntry={editEntry} date={new Date().toISOString} />
+      {!entries[todayISO] ? (
+        <WaistForm editEntry={editEntry} entry={{ date: todayISO }} />
+      ) : null}
       <div>
         {Object.values(entries).map(({ value, date }) => {
           const formattedDate = new Date(date);
           return (
             <div key={date}>
-              <p>{formattedDate.toLocaleString('mm/dd/yyyy')}</p>
+              <p>{formattedDate.toLocaleDateString()}</p>
               <p>{value}</p>
             </div>
           )
