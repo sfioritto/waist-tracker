@@ -18,7 +18,28 @@ const WaistForm = ({ editEntry, entry }) => {
       </button>
     </div>
   );
-}
+};
+
+const Entry = ({ entry, editEntry }) => {
+  const { date, value } = entry;
+  const formattedDate = new Date(date).toLocaleDateString();
+  const [editMode, setEditMode] = useState(false);
+
+  const editCallback = useCallback((entry) => {
+    editEntry(entry);
+    setEditMode(false);
+  }, [setEditMode, editEntry]);
+
+  return editMode ? (
+    <WaistForm entry={entry} editEntry={editCallback} />
+  ): (
+    <div>
+      <p>{formattedDate}</p>
+      <p>{value}</p>
+      <button onClick={() => setEditMode(true)}>Edit</button>
+    </div>
+  )
+};
 
 function App() {
   const [entries, setEntries] = useState({});
@@ -32,23 +53,15 @@ function App() {
       [entry.date]: entry,
     });
   }, [entries, setEntries])
-  console.log(entries)
-  console.log(todayISO)
-  console.log(entries[todayISO])
+
   return (
     <div>
       {!entries[todayISO] ? (
         <WaistForm editEntry={editEntry} entry={{ date: todayISO }} />
       ) : null}
       <div>
-        {Object.values(entries).map(({ value, date }) => {
-          const formattedDate = new Date(date);
-          return (
-            <div key={date}>
-              <p>{formattedDate.toLocaleDateString()}</p>
-              <p>{value}</p>
-            </div>
-          )
+        {Object.values(entries).map((entry) => {
+          return <Entry key={entry.date} entry={entry} editEntry={editEntry} />;
         })}
       </div>
     </div>
